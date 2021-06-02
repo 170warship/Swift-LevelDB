@@ -83,7 +83,7 @@ class ViewController: UIViewController{
         
         
         print("############################")
-        print(self.db?.object(forKey: "float") as! Float)
+        print(self.db?.object(forKey: "float") as! CGFloat)
         print("############################")
         
         print()

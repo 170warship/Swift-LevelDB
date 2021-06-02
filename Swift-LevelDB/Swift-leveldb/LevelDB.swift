@@ -14,7 +14,7 @@ public protocol Slice {
 
 extension Data: Slice {
     public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
-        return self.withUnsafeBytes {
+        return withUnsafeBytes {
             pointer($0, self.count)
         }
     }
@@ -26,37 +26,42 @@ extension Data: Slice {
 
 extension String: Slice {
     public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
-        return self.utf8CString.withUnsafeBufferPointer {
+        return utf8CString.withUnsafeBufferPointer {
             pointer($0.baseAddress!, Int(strlen($0.baseAddress!)))
         }
     }
 
     public func data() -> Data {
-        return self.utf8CString.withUnsafeBufferPointer {
+        return utf8CString.withUnsafeBufferPointer {
             return Data(buffer: $0)
         }
     }
 }
 
-struct LevelDBOptions {}
-
+struct LevelDBOptions {
+    var createIfMissing: Bool = true
+    var createIntermediateDirectories: Bool = true
+    var errorIfExists: Bool = false
+    var paranoidCheck: Bool = false
+    var compression: Bool = false
+    var filterPolicy: Int = 0
+    var cacheSize: size_t = 0
+}
 
 class LevelDB: NSObject {
-    
-    var db: OpaquePointer?
-    var readOptions: OpaquePointer?
-    var writeOptions: OpaquePointer?
-    var writeSync = false
-    
+    fileprivate var db: OpaquePointer?
+    fileprivate var writeSync = false
+    fileprivate var readOptions: OpaquePointer?
+    fileprivate var writeOptions: OpaquePointer?
     fileprivate var dbPath: String?
     fileprivate var dbName: String?
 
-    open class func databaseInLibrary(withName name: String) -> LevelDB {
+    public class func databaseInLibrary(withName name: String) -> LevelDB {
         let opts = LevelDBOptions()
         return LevelDB.databaseInLibrary(withName: name, andOptions: opts)
     }
     
-    open class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB {
+    public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB {
         let path = LevelDB.getLibraryPath() + "/" + name
         return LevelDB(path: path, name: name, andOptions: options)!
     }
@@ -82,8 +87,7 @@ class LevelDB: NSObject {
         leveldb_options_set_paranoid_checks(options, 0)
         leveldb_options_set_error_if_exists(options, 0)
         leveldb_options_set_compression(options, Int32(leveldb_snappy_compression))
-        // leveldb_options_set_filter_policy(<#T##OpaquePointer!#>, <#T##OpaquePointer!#>)
-        
+
         var error: UnsafeMutablePointer<Int8>?
         let dbPointer = path!.utf8CString.withUnsafeBufferPointer {
             leveldb_open(options, $0.baseAddress!, &error)
@@ -123,13 +127,17 @@ class LevelDB: NSObject {
         return paths.first ?? ""
     }
     
-    open class func makeOptions() -> LevelDBOptions {
-        return LevelDBOptions()
+    public class func makeOptions() -> LevelDBOptions {
+        return LevelDBOptions(createIfMissing: true, createIntermediateDirectories: true, errorIfExists: false, paranoidCheck: false, compression: false, filterPolicy: 0, cacheSize: 0)
     }
     
     // MARK: Set
 
     public func setObject(_ object: Any?, forKey key: Slice) {
+        assert(db != nil, "Database reference is not existent (it has probably been closed)")
+        assert(key is String || key is Data, "key must be String type or Data type")
+        assert(object != nil, "Stored value cannot be empty")
+        
         leveldb_writeoptions_set_sync(writeOptions, safe == true ? 1 : 0)
         var error: UnsafeMutablePointer<Int8>?
         key.slice { keyBytes, keyCount in
@@ -211,6 +219,9 @@ class LevelDB: NSObject {
     // MARK: Delete
 
     public func removeObject(forKey key: Slice) {
+        assert(db != nil, "Database reference is not existent (it has probably been closed)")
+        assert(key is String || key is Data, "key must be String type or Data type")
+        
         var error: UnsafeMutablePointer<Int8>?
         key.slice { bytes, len in
             leveldb_delete(self.db, self.writeOptions, bytes, len, &error)
@@ -226,6 +237,9 @@ class LevelDB: NSObject {
     }
     
     public func objectExists(forKey: Slice) -> Bool {
+        assert(db != nil, "Database reference is not existent (it has probably been closed)")
+        assert(forKey is String || forKey is Data, "key must be String type or Data type")
+        
         return object(forKey: forKey) != nil
     }
     
@@ -240,5 +254,3 @@ class LevelDB: NSObject {
         }
     }
 }
-
-
