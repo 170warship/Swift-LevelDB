@@ -36,6 +36,17 @@ class ViewController: UIViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+       
+        let ldb:LevelDB! = LevelDB.databaseInLibrary(withName: "share.db")
+        
+        ldb.setObject("test", forKey: "String")
+        print(ldb.object(forKey:"string") as? String ?? "")
+        
+        ldb.setObject(["key1":"value1","key2":"value2"], forKey: "dictionray")
+        print(ldb.object(forKey:"dictionray") as? [String:String] ?? [])
+    }
+    
+    func test() {
         
         self.db = LevelDB.databaseInLibrary(withName: "share.db")
       

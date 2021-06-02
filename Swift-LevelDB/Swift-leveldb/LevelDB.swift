@@ -61,12 +61,12 @@ class LevelDB: NSObject {
     fileprivate var dbPath: String?
     fileprivate var dbName: String?
 
-    public class func databaseInLibrary(withName name: String) -> LevelDB {
+    public class func databaseInLibrary(withName name: String) -> LevelDB! {
         let opts = LevelDBOptions()
         return LevelDB.databaseInLibrary(withName: name, andOptions: opts)
     }
     
-    public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB {
+    public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB! {
         let path = LevelDB.getLibraryPath() + "/" + name
         return LevelDB(path: path, name: name, andOptions: options)!
     }
