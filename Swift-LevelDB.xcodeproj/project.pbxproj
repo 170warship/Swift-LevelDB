@@ -20,7 +20,6 @@
 		02F3AE1E2664E5BD00AECB0D /* include in Resources */ = {isa = PBXBuildFile; fileRef = 02F3AE1D2664E5BD00AECB0D /* include */; };
 		02F3AE522664E8A300AECB0D /* LevelDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F3AE512664E8A300AECB0D /* LevelDB.swift */; };
 		02F3AE672664EAF000AECB0D /* test.mm in Sources */ = {isa = PBXBuildFile; fileRef = 02F3AE662664EAF000AECB0D /* test.mm */; };
-		02F3AE7126650D9400AECB0D /* Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F3AE7026650D9400AECB0D /* Slice.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,7 +73,6 @@
 		02F3AE612664EA1A00AECB0D /* comparator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = comparator.h; sourceTree = "<group>"; };
 		02F3AE622664EA1A00AECB0D /* table_builder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = table_builder.h; sourceTree = "<group>"; };
 		02F3AE662664EAF000AECB0D /* test.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test.mm; sourceTree = "<group>"; };
-		02F3AE7026650D9400AECB0D /* Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slice.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,7 +183,6 @@
 			isa = PBXGroup;
 			children = (
 				02F3AE512664E8A300AECB0D /* LevelDB.swift */,
-				02F3AE7026650D9400AECB0D /* Slice.swift */,
 				02F3AE232664E5EA00AECB0D /* Swift-LevelDB-Bridging-Header.h */,
 				02F3AE662664EAF000AECB0D /* test.mm */,
 			);
@@ -328,7 +325,6 @@
 				02F3ADE72664E53A00AECB0D /* ViewController.swift in Sources */,
 				02F3ADE32664E53A00AECB0D /* AppDelegate.swift in Sources */,
 				02F3AE522664E8A300AECB0D /* LevelDB.swift in Sources */,
-				02F3AE7126650D9400AECB0D /* Slice.swift in Sources */,
 				02F3ADE52664E53A00AECB0D /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

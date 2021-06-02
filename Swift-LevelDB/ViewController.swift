@@ -7,7 +7,6 @@
 
 import UIKit
 
-
 class Student: NSObject,NSCoding ,NSSecureCoding{
 
     static var supportsSecureCoding: Bool = true
@@ -17,6 +16,7 @@ class Student: NSObject,NSCoding ,NSSecureCoding{
     override init(){
         
     }
+    
     func encode(with coder: NSCoder) {
         coder.encode(self.name, forKey: "name")
         coder.encode(self.height, forKey: "height")
@@ -30,12 +30,13 @@ class Student: NSObject,NSCoding ,NSSecureCoding{
         self.level = coder.decodeInteger(forKey: "level")
     }
 }
-class ViewController: UIViewController {
+class ViewController: UIViewController{
 
     var db: LevelDB?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         self.db = LevelDB.databaseInLibrary(withName: "share.db")
       
         //1.set Int
@@ -56,7 +57,7 @@ class ViewController: UIViewController {
         // 6. set Bool
         self.db?.setObject(true, forKey: "flag")
         
-        // 7. set struce
+        // 7. set struct
         
         
         // 8.set model
@@ -75,32 +76,32 @@ class ViewController: UIViewController {
         self.db?.setObject(models, forKey: "models")
         
         print("############################")
-        print(self.db?.object(forKey: "int") as Any)
+        print(self.db?.object(forKey: "int") as! Int)
         print("############################")
         
         print()
         
         
         print("############################")
-        print(self.db?.object(forKey: "float") as Any)
+        print(self.db?.object(forKey: "float") as! Float)
         print("############################")
         
         print()
         
         print("############################")
-        print(self.db?.object(forKey: "name") as Any)
+        print(self.db?.object(forKey: "name") as! String)
         print("############################")
         
         print()
         
         print("############################")
-        print(self.db?.object(forKey: "array") as Any)
+        print(self.db?.object(forKey: "array") as! [String])
         print("############################")
         
         print()
         
         print("############################")
-        print(self.db?.object(forKey: "map") as Any)
+        print(self.db?.object(forKey: "map") as! [String:Any])
         print("############################")
         
         print()
@@ -124,6 +125,7 @@ class ViewController: UIViewController {
         print(Jack!.name)
         
         print(self.db?.object(forKey: "flag") as? Bool ?? false)
+ 
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
