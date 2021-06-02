@@ -8,11 +8,13 @@
 import UIKit
 
 public protocol Slice {
+    
     func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType
     func data() -> Data
 }
 
 extension Data: Slice {
+    
     public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
         return withUnsafeBytes {
             pointer($0, self.count)
@@ -25,6 +27,7 @@ extension Data: Slice {
 }
 
 extension String: Slice {
+    
     public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
         return utf8CString.withUnsafeBufferPointer {
             pointer($0.baseAddress!, Int(strlen($0.baseAddress!)))
@@ -39,6 +42,7 @@ extension String: Slice {
 }
 
 struct LevelDBOptions {
+    
     var createIfMissing: Bool = true
     var createIntermediateDirectories: Bool = true
     var errorIfExists: Bool = false
@@ -49,6 +53,7 @@ struct LevelDBOptions {
 }
 
 class LevelDB: NSObject {
+    
     fileprivate var db: OpaquePointer?
     fileprivate var writeSync = false
     fileprivate var readOptions: OpaquePointer?
@@ -96,15 +101,14 @@ class LevelDB: NSObject {
     }
 
     public func deleteDatabaseFromDisk() {
-        leveldb_close(db)
+        releaseWork()
         try? FileManager.default.removeItem(atPath: dbPath!)
-        db = nil
     }
     
     public func close() {
         leveldb_close(db)
     }
-    
+        
     public func path() -> String {
         return dbPath ?? ""
     }
@@ -252,5 +256,16 @@ class LevelDB: NSObject {
                 }
             }
         }
+    }
+    
+    private func releaseWork() {
+        close()
+        self.db = nil
+        self.readOptions = nil
+        self.writeOptions = nil
+    }
+    
+    deinit {
+        releaseWork()
     }
 }
