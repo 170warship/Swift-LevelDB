@@ -8,13 +8,11 @@
 import UIKit
 
 public protocol Slice {
-    
     func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType
     func data() -> Data
 }
 
 extension Data: Slice {
-    
     public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
         return withUnsafeBytes {
             pointer($0, self.count)
@@ -27,7 +25,6 @@ extension Data: Slice {
 }
 
 extension String: Slice {
-    
     public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
         return utf8CString.withUnsafeBufferPointer {
             pointer($0.baseAddress!, Int(strlen($0.baseAddress!)))
@@ -42,7 +39,6 @@ extension String: Slice {
 }
 
 struct LevelDBOptions {
-    
     var createIfMissing: Bool = true
     var createIntermediateDirectories: Bool = true
     var errorIfExists: Bool = false
@@ -53,9 +49,9 @@ struct LevelDBOptions {
 }
 
 class LevelDB: NSObject {
-    
     fileprivate var db: OpaquePointer?
     fileprivate var writeSync = false
+    fileprivate var isUseCache = false
     fileprivate var readOptions: OpaquePointer?
     fileprivate var writeOptions: OpaquePointer?
     fileprivate var dbPath: String?
@@ -82,16 +78,19 @@ class LevelDB: NSObject {
         dbName = name ?? ""
         
         readOptions = leveldb_readoptions_create()
-        leveldb_readoptions_set_fill_cache(readOptions, 1)
+        leveldb_readoptions_set_fill_cache(readOptions, 1) // Should the data read for this iteration be cached in memory. Default: true
+        leveldb_readoptions_set_verify_checksums(readOptions, 0) //  If true, all data read from underlying storage will be verified against corresponding checksums. Default: false
         
         writeOptions = leveldb_writeoptions_create()
-        leveldb_writeoptions_set_sync(writeOptions, 0)
+        leveldb_writeoptions_set_sync(writeOptions, 0) // If true, the write will be flushed from the operating system buffer cache (by calling WritableFile::Sync()) before the write is considered complete.  If this flag is true, writes will be slower.  Default: false
   
         let options = leveldb_options_create()
-        leveldb_options_set_create_if_missing(options, 1)
-        leveldb_options_set_paranoid_checks(options, 0)
-        leveldb_options_set_error_if_exists(options, 0)
-        leveldb_options_set_compression(options, Int32(leveldb_snappy_compression))
+        leveldb_options_set_create_if_missing(options, 1) // If true, the database will be created if it is missing. Default: false
+        leveldb_options_set_error_if_exists(options, 0) // If true, an error is raised if the database already exists.  Default: false
+        leveldb_options_set_paranoid_checks(options, 0) // If true, the implementation will do aggressive checking of the data it is processing and will stop early if it detects any errors. This may have unforeseen ramifications. Default: false
+        leveldb_options_set_write_buffer_size(options, 4 << 20) // Amount of data to build up in memory before converting to a sorted on-disk file. Default: 4MB
+        leveldb_options_set_max_open_files(options, 1000) // Number of open files that can be used by the DB. Default: 1000
+        leveldb_options_set_compression(options, Int32(leveldb_snappy_compression)) // Compress blocks using the specified compression algorithm. Default: kSnappyCompression
 
         var error: UnsafeMutablePointer<Int8>?
         let dbPointer = path!.utf8CString.withUnsafeBufferPointer {
@@ -119,10 +118,21 @@ class LevelDB: NSObject {
     
     public var safe: Bool {
         get {
-            return writeSync
+            writeSync
         }
         set {
             writeSync = newValue
+            leveldb_writeoptions_set_sync(writeOptions, newValue ? 1 : 0)
+        }
+    }
+    
+    public var useCache: Bool {
+        get {
+            isUseCache
+        }
+        set {
+            isUseCache = newValue
+            leveldb_readoptions_set_fill_cache(readOptions, newValue ? 1 : 0)
         }
     }
     
@@ -213,8 +223,7 @@ class LevelDB: NSObject {
             var len = 0
             let result: UnsafePointer<Int8> = leveldb_iter_key(iterator, &len)
             let data = Data(bytes: result, count: len)
-            let key = String(data: data, encoding: .utf8)
-            keys.append(key!)
+            keys.append(data)
             leveldb_iter_next(iterator)
         }
         return keys
@@ -260,9 +269,9 @@ class LevelDB: NSObject {
     
     private func releaseWork() {
         close()
-        self.db = nil
-        self.readOptions = nil
-        self.writeOptions = nil
+        db = nil
+        readOptions = nil
+        writeOptions = nil
     }
     
     deinit {
