@@ -39,11 +39,11 @@ extension String: Slice {
 }
 
 struct LevelDBOptions {
-    var createIfMissing: Bool = true
-    var createIntermediateDirectories: Bool = true
-    var errorIfExists: Bool = false
-    var paranoidCheck: Bool = false
-    var compression: Bool = false
+    var createIfMissing = true
+    var createIntermediateDirectories = true
+    var errorIfExists = false
+    var paranoidCheck = false
+    var compression = false
     var filterPolicy: Int = 0
     var cacheSize: size_t = 0
 }
@@ -64,7 +64,6 @@ class LevelDB: NSObject {
     
     public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB! {
         let path = LevelDB.getLibraryPath() + "/" + name
-        print(path)
         return LevelDB(path: path, name: name, andOptions: options)!
     }
 
@@ -75,8 +74,14 @@ class LevelDB: NSObject {
     
     public init?(path: String?, name: String?, andOptions opts: LevelDBOptions) {
         super.init()
-        dbPath = path ?? ""
-        dbName = name ?? ""
+        
+        guard let dbPath = path else {
+            return
+        }
+        
+        guard let dbName = name else {
+            return
+        }
         
         readOptions = leveldb_readoptions_create()
         leveldb_readoptions_set_fill_cache(readOptions, 1) // Should the data read for this iteration be cached in memory. Default: true
@@ -94,10 +99,12 @@ class LevelDB: NSObject {
         leveldb_options_set_compression(options, Int32(leveldb_snappy_compression)) // Compress blocks using the specified compression algorithm. Default: kSnappyCompression
 
         var error: UnsafeMutablePointer<Int8>?
-        let dbPointer = path!.utf8CString.withUnsafeBufferPointer {
+        let dbPointer = dbPath.utf8CString.withUnsafeBufferPointer {
             leveldb_open(options, $0.baseAddress!, &error)
         }
-        db = dbPointer
+        self.dbPath = dbPath
+        self.dbName = dbName
+        self.db = dbPointer
     }
 
     public func deleteDatabaseFromDisk() {
@@ -161,7 +168,6 @@ class LevelDB: NSObject {
         assert(key is String || key is Data, "key must be String type or Data type")
         assert(object != nil, "Stored value cannot be empty")
         
-        leveldb_writeoptions_set_sync(writeOptions, safe == true ? 1 : 0)
         var error: UnsafeMutablePointer<Int8>?
         key.slice { keyBytes, keyCount in
             if let value = object {
