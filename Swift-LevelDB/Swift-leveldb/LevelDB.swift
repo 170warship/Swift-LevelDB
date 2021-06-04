@@ -64,6 +64,7 @@ class LevelDB: NSObject {
     
     public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB! {
         let path = LevelDB.getLibraryPath() + "/" + name
+        print(path)
         return LevelDB(path: path, name: name, andOptions: options)!
     }
 
@@ -100,12 +101,20 @@ class LevelDB: NSObject {
     }
 
     public func deleteDatabaseFromDisk() {
-        releaseWork()
-        try? FileManager.default.removeItem(atPath: dbPath!)
+        close()
+        guard let path = dbPath else {
+            return
+        }
+        try? FileManager.default.removeItem(atPath: path)
     }
     
     public func close() {
-        leveldb_close(db)
+        leveldb_close(db) // delete db
+        db = nil
+    }
+    
+    public func closed() -> Bool {
+        return db == nil
     }
         
     public func path() -> String {
@@ -166,7 +175,7 @@ class LevelDB: NSObject {
         }
     }
     
-    public func setValue(_ value: Any!, forKey key: Slice) {
+    override open func setValue(_ value: Any!, forKey key: String) {
         setObject(value, forKey: key)
     }
     
@@ -183,7 +192,7 @@ class LevelDB: NSObject {
 
     // MARK: Get
 
-    public func value(forKey key: Slice) -> Any! {
+    override open func value(forKey key: String) -> Any? {
         return object(forKey: key)
     }
     
@@ -266,15 +275,8 @@ class LevelDB: NSObject {
             }
         }
     }
-    
-    private func releaseWork() {
-        close()
-        db = nil
-        readOptions = nil
-        writeOptions = nil
-    }
-    
+        
     deinit {
-        releaseWork()
+       close()
     }
 }

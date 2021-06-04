@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		025F97BD266876B800F287F1 /* libmemenv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 025F97AD266876B700F287F1 /* libmemenv.a */; };
-		025F97BF266876B800F287F1 /* libleveldb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 025F97BB266876B800F287F1 /* libleveldb.a */; };
+		025F987E266908EB00F287F1 /* libleveldb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 025F9873266908EA00F287F1 /* libleveldb.a */; };
+		025F987F266908EB00F287F1 /* libmemenv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 025F987C266908EB00F287F1 /* libmemenv.a */; };
 		02F3ADE32664E53A00AECB0D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F3ADE22664E53A00AECB0D /* AppDelegate.swift */; };
 		02F3ADE52664E53A00AECB0D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F3ADE42664E53A00AECB0D /* SceneDelegate.swift */; };
 		02F3ADE72664E53A00AECB0D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F3ADE62664E53A00AECB0D /* ViewController.swift */; };
@@ -39,21 +39,21 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		025F97AD266876B700F287F1 /* libmemenv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmemenv.a; sourceTree = "<group>"; };
-		025F97AE266876B700F287F1 /* db.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = db.h; sourceTree = "<group>"; };
-		025F97AF266876B700F287F1 /* write_batch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = write_batch.h; sourceTree = "<group>"; };
-		025F97B0266876B700F287F1 /* dumpfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dumpfile.h; sourceTree = "<group>"; };
-		025F97B1266876B700F287F1 /* iterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iterator.h; sourceTree = "<group>"; };
-		025F97B2266876B700F287F1 /* table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = table.h; sourceTree = "<group>"; };
-		025F97B3266876B700F287F1 /* c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = c.h; sourceTree = "<group>"; };
-		025F97B4266876B700F287F1 /* cache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
-		025F97B6266876B700F287F1 /* filter_policy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filter_policy.h; sourceTree = "<group>"; };
-		025F97B7266876B700F287F1 /* env.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = env.h; sourceTree = "<group>"; };
-		025F97B8266876B800F287F1 /* table_builder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = table_builder.h; sourceTree = "<group>"; };
-		025F97B9266876B800F287F1 /* options.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = options.h; sourceTree = "<group>"; };
-		025F97BA266876B800F287F1 /* status.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = status.h; sourceTree = "<group>"; };
-		025F97BB266876B800F287F1 /* libleveldb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libleveldb.a; sourceTree = "<group>"; };
-		025F97BC266876B800F287F1 /* comparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = comparator.h; sourceTree = "<group>"; };
+		025F986C266908EA00F287F1 /* db.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = db.h; sourceTree = "<group>"; };
+		025F986D266908EA00F287F1 /* cache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
+		025F986E266908EA00F287F1 /* status.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = status.h; sourceTree = "<group>"; };
+		025F986F266908EA00F287F1 /* table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = table.h; sourceTree = "<group>"; };
+		025F9870266908EA00F287F1 /* dumpfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dumpfile.h; sourceTree = "<group>"; };
+		025F9871266908EA00F287F1 /* write_batch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = write_batch.h; sourceTree = "<group>"; };
+		025F9872266908EA00F287F1 /* iterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iterator.h; sourceTree = "<group>"; };
+		025F9873266908EA00F287F1 /* libleveldb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libleveldb.a; sourceTree = "<group>"; };
+		025F9874266908EB00F287F1 /* table_builder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = table_builder.h; sourceTree = "<group>"; };
+		025F9875266908EB00F287F1 /* filter_policy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filter_policy.h; sourceTree = "<group>"; };
+		025F9876266908EB00F287F1 /* c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = c.h; sourceTree = "<group>"; };
+		025F9877266908EB00F287F1 /* options.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = options.h; sourceTree = "<group>"; };
+		025F9878266908EB00F287F1 /* comparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = comparator.h; sourceTree = "<group>"; };
+		025F987C266908EB00F287F1 /* libmemenv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libmemenv.a; sourceTree = "<group>"; };
+		025F987D266908EB00F287F1 /* env.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = env.h; sourceTree = "<group>"; };
 		02F3ADDF2664E53A00AECB0D /* Swift-LevelDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Swift-LevelDB.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		02F3ADE22664E53A00AECB0D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		02F3ADE42664E53A00AECB0D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -78,8 +78,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				025F97BF266876B800F287F1 /* libleveldb.a in Frameworks */,
-				025F97BD266876B800F287F1 /* libmemenv.a in Frameworks */,
+				025F987E266908EB00F287F1 /* libleveldb.a in Frameworks */,
+				025F987F266908EB00F287F1 /* libmemenv.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,21 +157,21 @@
 		02F3AE152664E54800AECB0D /* Leveldb-library */ = {
 			isa = PBXGroup;
 			children = (
-				025F97B3266876B700F287F1 /* c.h */,
-				025F97B4266876B700F287F1 /* cache.h */,
-				025F97BC266876B800F287F1 /* comparator.h */,
-				025F97AE266876B700F287F1 /* db.h */,
-				025F97B0266876B700F287F1 /* dumpfile.h */,
-				025F97B7266876B700F287F1 /* env.h */,
-				025F97B6266876B700F287F1 /* filter_policy.h */,
-				025F97B1266876B700F287F1 /* iterator.h */,
-				025F97BB266876B800F287F1 /* libleveldb.a */,
-				025F97AD266876B700F287F1 /* libmemenv.a */,
-				025F97B9266876B800F287F1 /* options.h */,
-				025F97BA266876B800F287F1 /* status.h */,
-				025F97B8266876B800F287F1 /* table_builder.h */,
-				025F97B2266876B700F287F1 /* table.h */,
-				025F97AF266876B700F287F1 /* write_batch.h */,
+				025F9876266908EB00F287F1 /* c.h */,
+				025F986D266908EA00F287F1 /* cache.h */,
+				025F9878266908EB00F287F1 /* comparator.h */,
+				025F986C266908EA00F287F1 /* db.h */,
+				025F9870266908EA00F287F1 /* dumpfile.h */,
+				025F987D266908EB00F287F1 /* env.h */,
+				025F9875266908EB00F287F1 /* filter_policy.h */,
+				025F9872266908EA00F287F1 /* iterator.h */,
+				025F9873266908EA00F287F1 /* libleveldb.a */,
+				025F987C266908EB00F287F1 /* libmemenv.a */,
+				025F9877266908EB00F287F1 /* options.h */,
+				025F986E266908EA00F287F1 /* status.h */,
+				025F9874266908EB00F287F1 /* table_builder.h */,
+				025F986F266908EA00F287F1 /* table.h */,
+				025F9871266908EA00F287F1 /* write_batch.h */,
 			);
 			path = "Leveldb-library";
 			sourceTree = "<group>";

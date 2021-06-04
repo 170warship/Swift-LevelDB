@@ -7,15 +7,12 @@
 
 import UIKit
 
-class Student: NSObject,NSCoding ,NSSecureCoding{
-
+class Student: NSObject, NSCoding, NSSecureCoding {
     static var supportsSecureCoding: Bool = true
     var name: String = ""
     var height: Float = 175.5
     var level: Int = 5
-    override init(){
-        
-    }
+    override init() {}
     
     func encode(with coder: NSCoder) {
         coder.encode(self.name, forKey: "name")
@@ -30,119 +27,131 @@ class Student: NSObject,NSCoding ,NSSecureCoding{
         self.level = coder.decodeInteger(forKey: "level")
     }
 }
-class ViewController: UIViewController{
 
+class Person: NSObject, Codable {
+    var name: String = ""
+    var age: Int = 1
+    
+    override init() {}
+    
+    enum CodingKeys: String, CodingKey {
+        case name
+        case age
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.age = try container.decode(Int.self, forKey: .age)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.name, forKey: .name)
+        try container.encode(self.age, forKey: .age)
+    }
+}
+
+class ViewController: UIViewController {
     var db: LevelDB?
     
     override func viewDidLoad() {
         super.viewDidLoad()
        
-        let ldb:LevelDB! = LevelDB.databaseInLibrary(withName: "share.db")
+        let ldb: LevelDB! = LevelDB.databaseInLibrary(withName: "share.db")
         
+        // String
         ldb.setObject("test", forKey: "String")
-        print(ldb.object(forKey:"string") as? String ?? "")
+        print(ldb.object(forKey: "string") as? String ?? "")
         
-        ldb.setObject(["key1":"value1","key2":"value2"], forKey: "dictionray")
-        print(ldb.object(forKey:"dictionray") as? [String:String] ?? [])
-    }
-    
-    func test() {
+        // Dictionary
+        ldb.setObject(["key1": "value1", "key2": "value2"], forKey: "dictionray")
+        print(ldb.object(forKey: "dictionray") as? [String: String] ?? [])
         
-        self.db = LevelDB.databaseInLibrary(withName: "share.db")
-      
-        //1.set Int
-        self.db?.setObject(10, forKey: "int")
+        // Bool
+        ldb.setObject(true, forKey: "bool")
+        print(ldb.object(forKey: "bool") as? Bool ?? false)
         
-        //2 set float
-        self.db?.setObject(10.23, forKey: "float")
+        // Array
+        ldb.setObject(["1", "2", "3", "4"], forKey: "arrays")
+        print(ldb.object(forKey: "arrays") as? [String] ?? [])
         
-        // 3. set string
-        self.db?.setObject("cherish", forKey: "name")
+        // Float
+        ldb.setObject(10.5, forKey: "float")
+        print(ldb.object(forKey: "float") as? CGFloat ?? 0.0)
         
-        // 4. set array
-        self.db?.setObject(["1","2","3","4"], forKey: "array")
+        // Int
+        ldb.setObject(19, forKey: "int")
+        print(ldb.object(forKey: "int") as? CGFloat ?? 5)
         
-        // 5. set dictionary
-        self.db?.setObject(["name":"cherish","height":1765.5], forKey: "map")
-        
-        // 6. set Bool
-        self.db?.setObject(true, forKey: "flag")
-        
-        // 7. set struct
-        
-        
-        // 8.set model
+        // Struct
         let jack = Student()
         jack.name = "jack"
         jack.height = 178
         jack.level = 8
-        self.db?.setObject(jack, forKey: "jackModel")
+        ldb.setObject(jack, forKey: "struct")
+        let model = ldb.object(forKey: "struct") as? Student ?? Student()
+        print(model.name)
         
-        // 9. model Array
-        let rose = Student()
-        rose.name = "rose"
-        rose.height = 189
-        rose.level = 88
-        let models = [jack,rose]
-        self.db?.setObject(models, forKey: "models")
-        
-        print("############################")
-        print(self.db?.object(forKey: "int") as! Int)
-        print("############################")
-        
-        print()
-        
-        
-        print("############################")
-        print(self.db?.object(forKey: "float") as! CGFloat)
-        print("############################")
-        
-        print()
-        
-        print("############################")
-        print(self.db?.object(forKey: "name") as! String)
-        print("############################")
-        
-        print()
-        
-        print("############################")
-        print(self.db?.object(forKey: "array") as! [String])
-        print("############################")
-        
-        print()
-        
-        print("############################")
-        print(self.db?.object(forKey: "map") as! [String:Any])
-        print("############################")
-        
-        print()
-        
-        print("############################")
-        let stu = self.db?.object(forKey: "jackModel")
-        guard (stu as? Student) != nil else {
+        // [Struct]
+        let models: [Student] = [jack]
+        ldb.setObject(models, forKey: "models")
+        let students = ldb.object(forKey: "models") as? [Student]
+        guard let m = students?.first else {
             return
         }
-        print(jack.name)
-        print("############################")
+        print(m.level)
+      
+        // Codable
+        let p = Person()
+        p.name = "rose"
+        p.age = 15
+        ldb.setCodable(p, forKey: "codable")
+        let codablePerson = ldb.getCodable(forKey: "codable", type: Person.self)
+        print(codablePerson?.name ?? "", codablePerson?.age ?? 0)
         
-        print()
+        // [Codables]
+        let codables: [Person] = [p]
+        ldb.setCodable(codables, forKey: "codables")
+        let arr: [Person] = ldb.getCodable(forKey: "codables") ?? [Person]()
+        print(arr.first?.age ?? 0, arr.first?.name ?? "")
+   
+        ldb.setCodable(true, forKey: "boolCodable")
+        print(ldb.getCodable(forKey: "boolCodable") ?? false)
         
-        print(self.db?.allKeys() ?? [])
-        self.db?.removeObjects(forKeys: ["haha","name"])
-        print(self.db?.allKeys() ?? [])
+        // update
+        print("Before the update, the value of key is String = ",ldb.object(forKey: "String") as? String ?? "")
+        ldb.setObject("String", forKey: "String")
+        print("After the update, the value of key is String = ",ldb.value(forKey: "String") as? String ?? "")
         
-        let arr:[Student] = (self.db?.object(forKey: "models") as? [Student])!
-        let Jack = arr.first
-        print(Jack!.name)
+        // all keys
+        print("all keys")
+        for (index, item) in ldb.allKeys().enumerated() {
+            if item is Data {
+                print("index = \(index), key = \(String(data: item as! Data, encoding: .utf8) ?? "")")
+            }
+        }
+        print("1、The number of keys is \(ldb.allKeys().count)")
+        // remove
+        print("-------------------------------------")
         
-        print(self.db?.object(forKey: "flag") as? Bool ?? false)
- 
+        // removeObject
+        ldb.removeObject(forKey: "boolCodable")
+        for (index, item) in ldb.allKeys().enumerated() {
+            if item is Data {
+                print("index = \(index), key = \(String(data: item as! Data, encoding: .utf8) ?? "")")
+            }
+        }
+      
+        // remove all
+        print("2、The number of keys is \(ldb.allKeys().count)")
+        ldb.removeAllObjects()
+        print("3、The number of keys is \(ldb.allKeys().count)")
+        
+        // delete db
+        print(ldb.closed())
+        if ldb.closed() {
+            ldb.close()
+        }
     }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.db?.deleteDatabaseFromDisk()
-    }
-
-
 }
-
