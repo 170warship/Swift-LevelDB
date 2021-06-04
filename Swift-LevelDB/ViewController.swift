@@ -53,11 +53,18 @@ class Person: NSObject, Codable {
 }
 
 class ViewController: UIViewController {
-    var db: LevelDB?
     
     override func viewDidLoad() {
         super.viewDidLoad()
        
+        
+       // operationDB()
+        batchRWOperation()
+
+    }
+    
+    func operationDB()  {
+        
         let ldb: LevelDB! = LevelDB.databaseInLibrary(withName: "share.db")
         
         // String
@@ -149,9 +156,30 @@ class ViewController: UIViewController {
         print("3、The number of keys is \(ldb.allKeys().count)")
         
         // delete db
-        print(ldb.closed())
         if ldb.closed() {
             ldb.close()
         }
     }
+    
+    func batchRWOperation() {
+        
+        let ldb: LevelDB! = LevelDB.databaseInLibrary(withName: "test.db")
+        let count = 100000
+        //ldb.safe = false
+        let writeStartTime = CFAbsoluteTimeGetCurrent()
+        for index in 0...count {
+            ldb.setObject(index, forKey: "\(index)")
+        }
+        let writeEndTime = CFAbsoluteTimeGetCurrent()
+        debugPrint("执行时长：%f 秒", (writeEndTime - writeStartTime))
+        
+        
+        let readStartTime = CFAbsoluteTimeGetCurrent()
+        for index in 0...count {
+           let _ =  ldb.object(forKey: "\(index)")
+        }
+        let readEndTime = CFAbsoluteTimeGetCurrent()
+        debugPrint("执行时长：%f 秒", (readEndTime - readStartTime))
+    }
+    
 }

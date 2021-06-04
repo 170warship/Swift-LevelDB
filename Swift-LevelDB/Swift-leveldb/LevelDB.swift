@@ -49,13 +49,13 @@ struct LevelDBOptions {
 }
 
 class LevelDB: NSObject {
-    fileprivate var db: OpaquePointer?
+    fileprivate var db: OpaquePointer? = nil
     fileprivate var writeSync = false
     fileprivate var isUseCache = false
-    fileprivate var readOptions: OpaquePointer?
-    fileprivate var writeOptions: OpaquePointer?
-    fileprivate var dbPath: String?
-    fileprivate var dbName: String?
+    fileprivate var readOptions: OpaquePointer? = nil
+    fileprivate var writeOptions: OpaquePointer? = nil
+    fileprivate var dbPath: String? = ""
+    fileprivate var dbName: String? = ""
 
     public class func databaseInLibrary(withName name: String) -> LevelDB! {
         let opts = LevelDBOptions()
