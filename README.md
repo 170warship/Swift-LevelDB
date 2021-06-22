@@ -28,15 +28,15 @@ By far, the easiest way to integrate this library in your project is by using [C
  ldb.close()
 ```
 
-##### Delete  database
+#### Delete  database
 
 ```Swift
   ldb.deleteDatabaseFromDisk()
 ```
 
-##### Cache data
+#### Cache data
 
-###### Data structure
+##### Data structure
 
 ```Swift
 struct EncodableDecodableModel: Codable {
@@ -91,7 +91,7 @@ class Student: NSObject, NSCoding, NSSecureCoding {
 }
 ```
 
-######  Cached data structure
+#####  Cached data structure
 
 ```Swift
 
@@ -146,14 +146,14 @@ class Student: NSObject, NSCoding, NSSecureCoding {
 ```
 Remarks: The key type supports String and Data types
 
-##### Delete data
+#### Delete data
 
 ```Swift
  ldb.delte("Int")
 ```
 
 
-##### Keys
+#### Keys
 
 ```Swift
  let keys: [Slice] = ldb.keys()
