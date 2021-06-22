@@ -58,8 +58,6 @@ class LevelDB: NSObject {
     fileprivate var dbName: String? = ""
 
     /// Mark:: Open
-    
-    ///
     public class func open(path: String? = getLibraryPath(), db: String) -> LevelDB  {
         let dbPath = path ?? "" + "/" + db
         return LevelDB(path: dbPath, name: db, andOptions: makeOptions())!
@@ -178,6 +176,7 @@ class LevelDB: NSObject {
         }
     }
     
+    /// Support  Implementation NSCoding
     public func setObject(_ object: Any?, forKey key: Slice) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         assert(key is String || key is Data, "key must be String type or Data type")
@@ -196,6 +195,7 @@ class LevelDB: NSObject {
         }
     }
     
+    /// Support  Implementation  Codable
     public func setCodable<T>(_ value: T?, forKey key: Slice) where T: Codable {
         let data = try? JSONEncoder().encode(value!)
         assert(data != nil, "JSONEncoder faild!")
