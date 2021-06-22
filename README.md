@@ -36,7 +36,7 @@ By far, the easiest way to integrate this library in your project is by using [C
 
 ##### Cache data
 
-### Data structure
+###### Data structure
 
 ```Swift
 struct EncodableDecodableModel: Codable {
@@ -91,6 +91,7 @@ class Student: NSObject, NSCoding, NSSecureCoding {
 }
 ```
 
+######  Cached data structure
 
 ```Swift
  
