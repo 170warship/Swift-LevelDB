@@ -15,7 +15,7 @@ public protocol Slice {
 extension Data: Slice {
     public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
         return withUnsafeBytes {
-            pointer($0, self.count)
+            pointer($0.baseAddress!.assumingMemoryBound(to: Int8.self), self.count)
         }
     }
 
@@ -161,43 +161,88 @@ class LevelDB: NSObject {
         return LevelDBOptions(createIfMissing: true, createIntermediateDirectories: true, errorIfExists: false, paranoidCheck: false, compression: false, filterPolicy: 0, cacheSize: 0)
     }
     
-    // MARK: Set
-
+    // MARK: Put
+    public func put(_ key: Slice,value: Data?) {
+        var error: UnsafeMutablePointer<Int8>? = nil
+        key.slice { keyBytes, keyCount in
+            if let value = value {
+                value.withUnsafeBytes {
+                    leveldb_put(self.db, self.writeOptions, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), value.count, &error)
+                }
+            } else {
+                leveldb_put(self.db, self.writeOptions, keyBytes, keyCount,nil, 0, &error)
+            }
+        }
+    }
+    
     public func setObject(_ object: Any?, forKey key: Slice) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         assert(key is String || key is Data, "key must be String type or Data type")
         assert(object != nil, "Stored value cannot be empty")
         
+        assert(object is NSCoding, "value must implemented NSCoding protocol!")
+        
         var error: UnsafeMutablePointer<Int8>?
         key.slice { keyBytes, keyCount in
             if let value = object {
-                guard let data: Data = try? NSKeyedArchiver.archivedData(withRootObject: value, requiringSecureCoding: true) else {
-                    return
-                }
+                let data: Data = NSKeyedArchiver.archivedData(withRootObject: value)
                 data.withUnsafeBytes {
-                    leveldb_put(self.db, self.writeOptions, keyBytes, keyCount, $0, data.count, &error)
+                    leveldb_put(self.db, self.writeOptions, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), data.count, &error)
                 }
             }
         }
     }
     
+    public func setCodable<T>(_ value: T?, forKey key: Slice) where T: Codable {
+        let data = try? JSONEncoder().encode(value!)
+        assert(data != nil, "JSONEncoder faild!")
+        put(key, value: data)
+    }
+    
     override open func setValue(_ value: Any!, forKey key: String) {
         setObject(value, forKey: key)
     }
-    
-    public func setCodable<T>(_ value: T?, forKey key: Slice) where T: Codable {
-        if value == nil {
-            removeObject(forKey: key)
-            return
-        }
         
-        let data = try? JSONEncoder().encode(value!)
-        assert(data != nil, "JSONEncoder faild!")
-        setObject(data, forKey: key)
-    }
-
     // MARK: Get
-
+    public func get(_ key: Slice) -> Data? {
+        var error: UnsafeMutablePointer<Int8>?
+        var value: UnsafeMutablePointer<Int8>?
+        var valueLength = 0
+        key.slice { bytes, len in
+            value = leveldb_get(self.db, self.readOptions, bytes, len, &valueLength, &error)
+        }
+        // check fetch value lenght
+        guard valueLength > 0 else {
+            return nil
+        }
+        return Data(bytes: value!, count: valueLength)
+    }
+    
+    public func getCodable<T>(forKey: Slice) -> T? where T: Codable {
+        guard let data = get(forKey)  else { return nil }
+        let value = try? JSONDecoder().decode(T.self, from: data)
+        return value
+    }
+    
+    public func getCodable<T>(forKey: Slice, type: T.Type) -> T? where T: Codable {
+        let value: T? = getCodable(forKey: forKey)
+        return value
+    }
+    
+    public func keys() -> [Slice] {
+        let iterator = leveldb_create_iterator(db, readOptions)
+        leveldb_iter_seek_to_first(iterator)
+        var keys = [Slice]()
+        while leveldb_iter_valid(iterator) == 1 {
+            var len = 0
+            let result: UnsafePointer<Int8> = leveldb_iter_key(iterator, &len)
+            let data = Data(bytes: result, count: len)
+            keys.append(data)
+            leveldb_iter_next(iterator)
+        }
+        return keys
+    }
+    
     override open func value(forKey key: String) -> Any? {
         return object(forKey: key)
     }
@@ -213,47 +258,33 @@ class LevelDB: NSObject {
         guard valueLength > 0 else {
             return nil
         }
-        guard let object = try? NSKeyedUnarchiver.unarchiveObject(with: Data(bytes: value!, count: valueLength)) else {
-            return nil
-        }
+        let object = NSKeyedUnarchiver.unarchiveObject(with: Data(bytes: value!, count: valueLength)) 
         return object
     }
     
-    public func getCodable<T>(forKey: Slice) -> T? where T: Codable {
-        guard let data = object(forKey: forKey) as? Data else { return nil }
-        let value = try? JSONDecoder().decode(T.self, from: data)
-        return value
-    }
-    
-    public func getCodable<T>(forKey: Slice, type: T.Type) -> T? where T: Codable {
-        let value: T? = getCodable(forKey: forKey)
-        return value
-    }
-    
     public func allKeys() -> [Slice] {
-        let iterator = leveldb_create_iterator(db, readOptions)
-        leveldb_iter_seek_to_first(iterator)
-        var keys = [Slice]()
-        while leveldb_iter_valid(iterator) == 1 {
-            var len = 0
-            let result: UnsafePointer<Int8> = leveldb_iter_key(iterator, &len)
-            let data = Data(bytes: result, count: len)
-            keys.append(data)
-            leveldb_iter_next(iterator)
-        }
-        return keys
+        return keys()
+    }
+    
+    public func objectExists(forKey: Slice) -> Bool {
+        assert(db != nil, "Database reference is not existent (it has probably been closed)")
+        assert(forKey is String || forKey is Data, "key must be String type or Data type")
+        
+        return get(forKey) != nil
     }
     
     // MARK: Delete
-
-    public func removeObject(forKey key: Slice) {
-        assert(db != nil, "Database reference is not existent (it has probably been closed)")
-        assert(key is String || key is Data, "key must be String type or Data type")
-        
+    public func delete (_ key: Slice) {
         var error: UnsafeMutablePointer<Int8>?
         key.slice { bytes, len in
             leveldb_delete(self.db, self.writeOptions, bytes, len, &error)
         }
+    }
+    
+    public func removeObject(forKey key: Slice) {
+        assert(db != nil, "Database reference is not existent (it has probably been closed)")
+        assert(key is String || key is Data, "key must be String type or Data type")
+        delete(key)
     }
     
     public func removeObjects(forKeys keyArray: [Slice]) {
@@ -263,14 +294,7 @@ class LevelDB: NSObject {
             }
         }
     }
-    
-    public func objectExists(forKey: Slice) -> Bool {
-        assert(db != nil, "Database reference is not existent (it has probably been closed)")
-        assert(forKey is String || forKey is Data, "key must be String type or Data type")
         
-        return object(forKey: forKey) != nil
-    }
-    
     public func removeAllObjects() {
         let keys = allKeys()
         if keys.count > 0 {
@@ -281,8 +305,9 @@ class LevelDB: NSObject {
             }
         }
     }
-        
+            
     deinit {
        close()
     }
+    
 }

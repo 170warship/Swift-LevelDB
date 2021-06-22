@@ -52,20 +52,46 @@ class Person: NSObject, Codable {
     }
 }
 
+
+struct EncodableDecodableModel {
+    let id: Int
+    let name: String
+}
+
+extension EncodableDecodableModel: Encodable {
+    func toData() -> Data {
+        let json: [String: Any] = ["id": id, "name": name]
+
+        return try! JSONSerialization
+            .data(withJSONObject: json, options: .prettyPrinted)
+    }
+}
+
+extension EncodableDecodableModel: Decodable {
+    init(data: Data) {
+        let json = try! JSONSerialization
+            .jsonObject(with: data, options: .allowFragments) as! [String: Any]
+
+        id = json["id"] as! Int
+        name = json["name"] as! String
+    }
+}
+
+
 class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
        
-        
-       // operationDB()
-        batchRWOperation()
+       operationDB()
+       // batchRWOperation()
 
     }
     
     func operationDB()  {
         
         let ldb: LevelDB! = LevelDB.databaseInLibrary(withName: "share.db")
+        
         
         // String
         ldb.setObject("test", forKey: "String")
@@ -91,7 +117,7 @@ class ViewController: UIViewController {
         ldb.setObject(19, forKey: "int")
         print(ldb.object(forKey: "int") as? CGFloat ?? 5)
         
-        // Struct
+        // class instance
         let jack = Student()
         jack.name = "jack"
         jack.height = 178
@@ -100,7 +126,7 @@ class ViewController: UIViewController {
         let model = ldb.object(forKey: "struct") as? Student ?? Student()
         print(model.name)
         
-        // [Struct]
+        // [class instance]
         let models: [Student] = [jack]
         ldb.setObject(models, forKey: "models")
         let students = ldb.object(forKey: "models") as? [Student]
@@ -129,7 +155,7 @@ class ViewController: UIViewController {
         // update
         print("Before the update, the value of key is String = ",ldb.object(forKey: "String") as? String ?? "")
         ldb.setObject("String", forKey: "String")
-        print("After the update, the value of key is String = ",ldb.value(forKey: "String") as? String ?? "")
+       // print("After the update, the value of key is String = ",ldb.value(forKey: "String") as? String ?? "")
         
         // all keys
         print("all keys")
@@ -162,7 +188,7 @@ class ViewController: UIViewController {
     }
     
     func batchRWOperation() {
-        
+
         let ldb: LevelDB! = LevelDB.databaseInLibrary(withName: "test.db")
         let count = 100000
         //ldb.safe = false
