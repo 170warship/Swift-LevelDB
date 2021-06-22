@@ -22,23 +22,37 @@ By far, the easiest way to integrate this library in your project is by using [C
  let ldb = LevelDB.open(db: "share.db")
 ```
 
+#### Close database
+
+```Swift
+ ldb.close()
+```
+
+##### Delete  database
+
+```Swift
+  ldb.deleteDatabaseFromDisk()
+```
+
 ##### Cache data
 
 ```Swift
-let ldb:LevelDB! = LevelDB.databaseInLibrary(withName: "share.db")
-        
-ldb.setObject("test", forKey: "String")
-print(ldb.object(forKey:"string") as? String ?? "")
-        
-ldb.setObject(["key1":"value1","key2":"value2"], forKey: "dictionray")
-print(ldb.object(forKey:"dictionray") as? [String:String] ?? [])
-
-let allKeys = ldb.allKeys()
-for(index,item) in allKeys.enumerated() {
-    print("index = \(index)")
-}
-
+ ldb.put(key,value)
 ```
+
+##### Delete data
+
+```Swift
+ ldb.delte("key")
+```
+
+##### Keys
+
+```Swift
+ let keys: [Slice] = ldb.keys()
+```
+
+
 
 
 
