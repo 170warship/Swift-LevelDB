@@ -94,9 +94,7 @@ class Student: NSObject, NSCoding, NSSecureCoding {
 ######  Cached data structure
 
 ```Swift
- 
- let ldb = LevelDB.open(db: "test.db")
- 
+
  // Int
  ldb.setCodable(10, forKey: "Int")
  print(ldb.getCodable(forKey: "Int") ?? 0)
@@ -117,7 +115,7 @@ class Student: NSObject, NSCoding, NSSecureCoding {
  ldb.setCodable(["id":"89757","name":"json"], forKey: "Dictionary")
  print(ldb.getCodable(forKey: "Dictionary") ?? ["":""])
 
- //  Implement Codable protocol object
+ // Implement Codable protocol object
  let codable = EncodableDecodableModel.init(id: 233, name: "codable")
  ldb.setCodable(codable, forKey: "codable")
  let cacheCodable = ldb.getCodable(forKey: "codable",type: EncodableDecodableModel.self)
@@ -151,7 +149,7 @@ Remarks: The key type supports String and Data types
 ##### Delete data
 
 ```Swift
- ldb.delte("key")
+ ldb.delte("Int")
 ```
 
 
@@ -162,7 +160,9 @@ Remarks: The key type supports String and Data types
 ```
 
 
+## License
 
+Distributed under the MIT license
 
 
 
