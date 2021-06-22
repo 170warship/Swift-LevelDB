@@ -160,9 +160,12 @@ Remarks: The key type supports String and Data types
 ```
 
 
-## License
+### License
 
-Distributed under the MIT license
+Distributed under the [MIT license](LICENSE)
+
+[1]: http://cocoapods.org
+[2]: http://leveldb.googlecode.com/svn/trunk/doc/index.html
 
 
 
