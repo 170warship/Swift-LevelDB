@@ -19,7 +19,7 @@ By far, the easiest way to integrate this library in your project is by using [C
 #### Creating/Opening a database file on disk
 
 ```Swift
-var ldb = LevelDB.databaseInLibrary(withName: "share.db")
+ let ldb = LevelDB.open(db: "share.db")
 ```
 
 ##### Cache data

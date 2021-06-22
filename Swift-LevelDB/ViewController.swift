@@ -90,8 +90,7 @@ class ViewController: UIViewController {
     
     func operationDB()  {
         
-        let ldb: LevelDB! = LevelDB.databaseInLibrary(withName: "share.db")
-        
+        let ldb = LevelDB.open(db: "share.db")
         
         // String
         ldb.setObject("test", forKey: "String")
@@ -180,6 +179,20 @@ class ViewController: UIViewController {
         print("2、The number of keys is \(ldb.allKeys().count)")
         ldb.removeAllObjects()
         print("3、The number of keys is \(ldb.allKeys().count)")
+        
+        //Codable
+        let structModel = EncodableDecodableModel.init(id: 89757, name: "kkk")
+        ldb.setCodable(structModel, forKey: "ttt")
+        ldb.setCodable([structModel], forKey: "ttts")
+        let cacheModel = ldb.getCodable(forKey: "ttt", type: EncodableDecodableModel.self)
+        let cacheModels = ldb.getCodable(forKey: "ttts") ?? [EncodableDecodableModel]()
+        ldb.setCodable(["1","2","3"], forKey: "baseboo")
+        let baseboo = ldb.getCodable(forKey: "baseboo") ?? [String]()
+        
+        print(cacheModel?.name as Any)
+        
+        var list = [String]()
+        list.append("")
         
         // delete db
         if ldb.closed() {

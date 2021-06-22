@@ -57,12 +57,20 @@ class LevelDB: NSObject {
     fileprivate var dbPath: String? = ""
     fileprivate var dbName: String? = ""
 
-    public class func databaseInLibrary(withName name: String) -> LevelDB! {
-        let opts = LevelDBOptions()
+    /// Mark:: Open
+    
+    ///
+    public class func open(path: String? = getLibraryPath(), db: String) -> LevelDB  {
+        let dbPath = path ?? "" + "/" + db
+        return LevelDB(path: dbPath, name: db, andOptions: makeOptions())!
+    }
+    
+    public class func databaseInLibrary(withName name: String) -> LevelDB {
+        let opts = makeOptions()
         return LevelDB.databaseInLibrary(withName: name, andOptions: opts)
     }
     
-    public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB! {
+    public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB {
         let path = LevelDB.getLibraryPath() + "/" + name
         return LevelDB(path: path, name: name, andOptions: options)!
     }
@@ -106,24 +114,8 @@ class LevelDB: NSObject {
         self.dbName = dbName
         self.db = dbPointer
     }
-
-    public func deleteDatabaseFromDisk() {
-        close()
-        guard let path = dbPath else {
-            return
-        }
-        try? FileManager.default.removeItem(atPath: path)
-    }
     
-    public func close() {
-        leveldb_close(db) // delete db
-        db = nil
-    }
-    
-    public func closed() -> Bool {
-        return db == nil
-    }
-        
+    /// Mark: Get  Database path
     public func path() -> String {
         return dbPath ?? ""
     }
@@ -132,6 +124,12 @@ class LevelDB: NSObject {
         return dbName ?? ""
     }
     
+    private class func getLibraryPath() -> String {
+        let paths: [String] = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)
+        return paths.first ?? ""
+    }
+    
+    /// Mark :  Public Properties
     public var safe: Bool {
         get {
             writeSync
@@ -152,16 +150,21 @@ class LevelDB: NSObject {
         }
     }
     
-    private class func getLibraryPath() -> String {
-        let paths: [String] = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)
-        return paths.first ?? ""
-    }
-    
     public class func makeOptions() -> LevelDBOptions {
         return LevelDBOptions(createIfMissing: true, createIntermediateDirectories: true, errorIfExists: false, paranoidCheck: false, compression: false, filterPolicy: 0, cacheSize: 0)
     }
     
-    // MARK: Put
+    /// Mark:  Close
+    public func close() {
+        leveldb_close(db) // delete db
+        db = nil
+    }
+    
+    public func closed() -> Bool {
+        return db == nil
+    }
+    
+    /// Mark: Put
     public func put(_ key: Slice,value: Data?) {
         var error: UnsafeMutablePointer<Int8>? = nil
         key.slice { keyBytes, keyCount in
@@ -203,7 +206,7 @@ class LevelDB: NSObject {
         setObject(value, forKey: key)
     }
         
-    // MARK: Get
+    /// Mark: Get
     public func get(_ key: Slice) -> Data? {
         var error: UnsafeMutablePointer<Int8>?
         var value: UnsafeMutablePointer<Int8>?
@@ -247,7 +250,7 @@ class LevelDB: NSObject {
         return object(forKey: key)
     }
     
-    public func object(forKey key: Slice) -> Any! {
+    public func object(forKey key: Slice) -> Any? {
         var error: UnsafeMutablePointer<Int8>?
         var value: UnsafeMutablePointer<Int8>?
         var valueLength = 0
@@ -273,7 +276,7 @@ class LevelDB: NSObject {
         return get(forKey) != nil
     }
     
-    // MARK: Delete
+    /// Mark: Delete
     public func delete (_ key: Slice) {
         var error: UnsafeMutablePointer<Int8>?
         key.slice { bytes, len in
@@ -305,9 +308,16 @@ class LevelDB: NSObject {
             }
         }
     }
-            
+    
+    public func deleteDatabaseFromDisk() {
+        close()
+        guard let path = dbPath else {
+            return
+        }
+        try? FileManager.default.removeItem(atPath: path)
+    }
+    
     deinit {
        close()
     }
-    
 }
