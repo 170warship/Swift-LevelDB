@@ -7,7 +7,7 @@
 
 import UIKit
 
-class LevelDB: NSObject {
+final class LevelDB {
     fileprivate var db: OpaquePointer?
     fileprivate var writeSync = false
     fileprivate var isUseCache = false
@@ -17,17 +17,12 @@ class LevelDB: NSObject {
     // MARK: Open
 
     public class func open(path: String? = getLibraryPath(), db: String) -> LevelDB {
-        let dbPath = path ?? "" + "/" + db
-        return LevelDB(path: dbPath, name: db, andOptions: makeOptions())!
+        let dbPath = (path ?? "") + "/" + db
+        return LevelDB(path: dbPath, name: db, andOptions: makeOptions())
     }
-    
-    public init?(path: String?, andName name: String?) {
-        let opts = LevelDBOptions()
-        _ = LevelDB(path: path, name: name, andOptions: opts)
-    }
-    
-    public init?(path: String?, name: String?, andOptions opts: LevelDBOptions) {
-        super.init()
+        
+    public convenience init(path: String?, name: String?, andOptions opts: LevelDBOptions) {
+        self.init()
         
         guard let dbPath = path else {
             return
@@ -36,15 +31,15 @@ class LevelDB: NSObject {
         guard let dbName = name else {
             return
         }
-        
-        let options = FileOptions(options: FileOption.standard).pointer
+       let levelOption = FileOptions(options: FileOption.standard)
         var error: UnsafeMutablePointer<Int8>?
         let dbPointer = dbPath.utf8CString.withUnsafeBufferPointer {
-            leveldb_open(options, $0.baseAddress!, &error)
+            leveldb_open(levelOption.pointer, $0.baseAddress!, &error)
         }
+        self.db = dbPointer
         self.dbPath = dbPath
         self.dbName = dbName
-        self.db = dbPointer
+      
     }
 
     private class func getLibraryPath() -> String {
@@ -65,14 +60,14 @@ class LevelDB: NSObject {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
         var error: UnsafeMutablePointer<Int8>?
-        let writeOptions = ReadOptions(options: ReadOption.standard).pointer
+        let writeOptions = ReadOptions(options: ReadOption.standard)
         key.slice { keyBytes, keyCount in
             if let value = value {
                 value.withUnsafeBytes {
-                    leveldb_put(self.db, writeOptions, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), value.count, &error)
+                    leveldb_put(self.db, writeOptions.pointer, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), value.count, &error)
                 }
             } else {
-                leveldb_put(self.db, writeOptions, keyBytes, keyCount, nil, 0, &error)
+                leveldb_put(self.db, writeOptions.pointer, keyBytes, keyCount, nil, 0, &error)
             }
         }
     }
@@ -99,9 +94,9 @@ class LevelDB: NSObject {
  
     public func keys() -> [Slice] {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
-        let readOptions = ReadOptions(options: ReadOption.standard).pointer
+        let readOptions = ReadOptions(options: ReadOption.standard)
         
-        let iterator = leveldb_create_iterator(db, readOptions)
+        let iterator = leveldb_create_iterator(db, readOptions.pointer)
         leveldb_iter_seek_to_first(iterator)
         var keys = [Slice]()
         while leveldb_iter_valid(iterator) == 1 {
@@ -115,6 +110,7 @@ class LevelDB: NSObject {
     }
     
     // MARK: Write
+    
     public func write(options:[WriteOption] = WriteOption.standard) {
         #warning("TO DO")
     }
@@ -125,9 +121,9 @@ class LevelDB: NSObject {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
         var error: UnsafeMutablePointer<Int8>?
-        let writeOptions = WriteOptions(options: options).pointer
+        let writeOptions = WriteOptions(options: options)
         key.slice { bytes, len in
-            leveldb_delete(self.db, writeOptions, bytes, len, &error)
+            leveldb_delete(self.db, writeOptions.pointer, bytes, len, &error)
         }
     }
     
@@ -150,7 +146,7 @@ extension LevelDB {
     
     public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB {
         let path = LevelDB.getLibraryPath() + "/" + name
-        return LevelDB(path: path, name: name, andOptions: options)!
+        return LevelDB.open(path: path, db: name)
     }
 
     public var safe: Bool {
@@ -199,11 +195,11 @@ extension LevelDB {
         }
     }
     
-    override open func setValue(_ value: Any!, forKey key: String) {
+    public func setValue(_ value: Any!, forKey key: String) {
         setObject(value, forKey: key)
     }
     
-    override open func value(forKey key: String) -> Any? {
+    public func value(forKey key: String) -> Any? {
         return object(forKey: key)
     }
     

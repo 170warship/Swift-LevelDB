@@ -85,6 +85,7 @@ public enum FileOption: Option {
     
     public static var standard: [FileOption] {
         return [
+            .createIfMissing,
             .writeBufferSize(4 << 20),
             .maxOpenFiles(1000),
             .blockSize(1024 * 4),

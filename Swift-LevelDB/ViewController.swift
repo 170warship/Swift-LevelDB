@@ -62,8 +62,8 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //readMeTest()
-        test()
+        readMeTest()
+        //test()
     }
     
     func readMeTest() {
