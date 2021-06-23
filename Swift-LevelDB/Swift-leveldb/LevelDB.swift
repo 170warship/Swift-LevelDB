@@ -11,8 +11,8 @@ final class LevelDB {
     fileprivate var db: OpaquePointer?
     fileprivate var writeSync = false
     fileprivate var isUseCache = false
-    fileprivate var dbPath: String? = ""
-    fileprivate var dbName: String? = ""
+    fileprivate var dbPath = ""
+    fileprivate var dbName = ""
 
     // MARK: Open
 
@@ -23,8 +23,8 @@ final class LevelDB {
     public convenience init(path: String = getLibraryPath(), name: String, andOptions options: [FileOption] = FileOption.standard) {
         self.init()
 
-        assert(name.count != 0,"The database name cannot be empty")
-        assert(options.contains(.createIfMissing),"options must contain .createIfMissing , Otherwise the database creation fails")
+        assert(name.count != 0, "The database name cannot be empty")
+        assert(options.contains(.createIfMissing), "options must contain .createIfMissing , Otherwise the database creation fails")
         
         let dbPath = path + "/" + name
         let levelOption = FileOptions(options: options)
@@ -39,13 +39,6 @@ final class LevelDB {
         self.dbName = name
     }
 
-    // MARK: Close
-
-    public func close() {
-        leveldb_close(db)
-        db = nil
-    }
-    
     // MARK: Put
 
     public func put(_ key: Slice, value: Data?, options: [WriteOption] = WriteOption.standard) {
@@ -101,12 +94,6 @@ final class LevelDB {
         return keys
     }
     
-    // MARK: Write
-    
-    public func write(options: [WriteOption] = WriteOption.standard) {
-        #warning("TO DO")
-    }
-    
     // MARK: Delete
 
     public func delete(_ key: Slice, options: [WriteOption] = WriteOption.standard) {
@@ -117,6 +104,19 @@ final class LevelDB {
         key.slice { bytes, len in
             leveldb_delete(self.db, writeOptions.pointer, bytes, len, &error)
         }
+    }
+    
+    // MARK: Close
+
+    public func close() {
+        leveldb_close(db)
+        db = nil
+    }
+    
+    // MARK: Write
+    
+    public func write(options: [WriteOption] = WriteOption.standard) {
+        #warning("TO DO")
     }
     
     deinit {
@@ -165,11 +165,11 @@ extension LevelDB {
     }
     
     public func path() -> String {
-        return dbPath ?? ""
+        return dbPath
     }
     
     public func name() -> String {
-        return dbName ?? ""
+        return dbName
     }
     
     public func setObject(_ object: Any?, forKey key: Slice) {
@@ -245,11 +245,10 @@ extension LevelDB {
     }
     
     public func deleteDatabaseFromDisk() {
-        close()
-        guard let path = dbPath else {
-            return
+        if self.db != nil {
+            close()
+            try? FileManager.default.removeItem(atPath: self.dbPath)
         }
-        try? FileManager.default.removeItem(atPath: path)
     }
     
     public func objectExists(forKey: Slice) -> Bool {
