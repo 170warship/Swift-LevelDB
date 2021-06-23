@@ -177,17 +177,9 @@ extension LevelDB {
         assert(key is String || key is Data, "key must be String type or Data type")
         assert(object != nil, "Stored value cannot be empty")
         assert(object is NSCoding, "value must implemented NSCoding protocol!")
-        
-        var error: UnsafeMutablePointer<Int8>?
-        key.slice { keyBytes, keyCount in
-            if let value = object {
-                let data: Data = NSKeyedArchiver.archivedData(withRootObject: value)
-                let writeOptions = WriteOptions(options: WriteOption.standard)
-                data.withUnsafeBytes {
-                    leveldb_put(self.db, writeOptions.pointer, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), data.count, &error)
-                }
-            }
-        }
+    
+        let data: Data = NSKeyedArchiver.archivedData(withRootObject: object as Any)
+        put(key, value: data)
     }
     
     public func setValue(_ value: Any!, forKey key: String) {
@@ -199,20 +191,10 @@ extension LevelDB {
     }
     
     public func object(forKey key: Slice) -> Any? {
-        var error: UnsafeMutablePointer<Int8>?
-        var value: UnsafeMutablePointer<Int8>?
-        var valueLength = 0
-        let readOptions = ReadOptions(options: ReadOption.standard)
-        
-        key.slice { bytes, len in
-            value = leveldb_get(self.db, readOptions.pointer, bytes, len, &valueLength, &error)
-        }
-        // check fetch value lenght
-        guard valueLength > 0 else {
+        guard let data = get(key) else {
             return nil
         }
-        let object = NSKeyedUnarchiver.unarchiveObject(with: Data(bytes: value!, count: valueLength))
-        return object
+        return NSKeyedUnarchiver.unarchiveObject(with: data)
     }
     
     public func allKeys() -> [Slice] {
@@ -222,6 +204,7 @@ extension LevelDB {
     public func removeObject(forKey key: Slice) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         assert(key is String || key is Data, "key must be String type or Data type")
+        
         delete(key)
     }
     
