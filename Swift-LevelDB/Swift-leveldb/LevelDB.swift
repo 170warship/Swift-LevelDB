@@ -22,7 +22,6 @@ final class LevelDB {
         
     public convenience init(path: String = getLibraryPath(), name: String, andOptions options: [FileOption] = FileOption.standard) {
         self.init()
-
         assert(name.count != 0, "The database name cannot be empty")
         assert(options.contains(.createIfMissing), "options must contain .createIfMissing , Otherwise the database creation fails")
         
@@ -182,7 +181,7 @@ extension LevelDB {
         put(key, value: data)
     }
     
-    public func setValue(_ value: Any!, forKey key: String) {
+    public func setValue(_ value: Any?, forKey key: Slice) {
         setObject(value, forKey: key)
     }
     
@@ -203,7 +202,6 @@ extension LevelDB {
     
     public func removeObject(forKey key: Slice) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
-        assert(key is String || key is Data, "key must be String type or Data type")
         
         delete(key)
     }
@@ -236,7 +234,6 @@ extension LevelDB {
     
     public func objectExists(forKey: Slice) -> Bool {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
-        assert(forKey is String || forKey is Data, "key must be String type or Data type")
         
         return get(forKey) != nil
     }

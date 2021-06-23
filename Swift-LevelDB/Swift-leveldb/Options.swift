@@ -22,6 +22,7 @@ public enum CompressionType: Int {
     case snappy
 }
 
+/// MARK :  option protocol
 public protocol Option {
     func set(options: OpaquePointer)
 
@@ -36,6 +37,8 @@ public protocol Options: class {
     var pointer: OpaquePointer { get }
 }
 
+
+/// MARK:   Leveldb_option_t
 public enum FileOption: Option, Equatable {
     case createIfMissing
     case errorIfExists
@@ -100,11 +103,12 @@ public final class FileOptions: Options {
     }
 }
 
+
+/// MARK:   Leveldb_readoptions_t
 public enum ReadOption: Option {
     case verifyChecksums
     case fillCache
     // case snapshot(Snapshot)
-
     public func set(options: OpaquePointer) {
         switch self {
         case .verifyChecksums:
@@ -139,6 +143,8 @@ public final class ReadOptions: Options {
     }
 }
 
+
+/// MARK:   leveldb_writeoptions_t
 public enum WriteOption: Option {
     case sync
 
