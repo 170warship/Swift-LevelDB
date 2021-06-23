@@ -16,37 +16,29 @@ final class LevelDB {
 
     // MARK: Open
 
-    public class func open(path: String? = getLibraryPath(), db: String) -> LevelDB {
-        let dbPath = (path ?? "") + "/" + db
-        return LevelDB(path: dbPath, name: db, andOptions: makeOptions())
+    public class func open(path: String = getLibraryPath(), db: String) -> LevelDB {
+        return LevelDB(path: path, name: db)
     }
         
-    public convenience init(path: String?, name: String?, andOptions opts: LevelDBOptions) {
+    public convenience init(path: String = getLibraryPath(), name: String, andOptions options: [FileOption] = FileOption.standard) {
         self.init()
+
+        assert(name.count != 0,"The database name cannot be empty")
+        assert(options.contains(.createIfMissing),"options must contain .createIfMissing , Otherwise the database creation fails")
         
-        guard let dbPath = path else {
-            return
-        }
-        
-        guard let dbName = name else {
-            return
-        }
-       let levelOption = FileOptions(options: FileOption.standard)
+        let dbPath = path + "/" + name
+        let levelOption = FileOptions(options: options)
         var error: UnsafeMutablePointer<Int8>?
+        
         let dbPointer = dbPath.utf8CString.withUnsafeBufferPointer {
             leveldb_open(levelOption.pointer, $0.baseAddress!, &error)
         }
+        
         self.db = dbPointer
         self.dbPath = dbPath
-        self.dbName = dbName
-      
+        self.dbName = name
     }
 
-    private class func getLibraryPath() -> String {
-        let paths: [String] = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)
-        return paths.first ?? ""
-    }
-    
     // MARK: Close
 
     public func close() {
@@ -74,7 +66,7 @@ final class LevelDB {
     
     // MARK: Get
 
-    public func get(_ key: Slice,options: [ReadOption] = ReadOption.standard) -> Data? {
+    public func get(_ key: Slice, options: [ReadOption] = ReadOption.standard) -> Data? {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
         var valueLength = 0
@@ -111,13 +103,13 @@ final class LevelDB {
     
     // MARK: Write
     
-    public func write(options:[WriteOption] = WriteOption.standard) {
+    public func write(options: [WriteOption] = WriteOption.standard) {
         #warning("TO DO")
     }
     
     // MARK: Delete
 
-    public func delete(_ key: Slice, options:[WriteOption] = WriteOption.standard ) {
+    public func delete(_ key: Slice, options: [WriteOption] = WriteOption.standard) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
         var error: UnsafeMutablePointer<Int8>?
@@ -139,14 +131,17 @@ extension LevelDB {
         return LevelDBOptions(createIfMissing: true, createIntermediateDirectories: true, errorIfExists: false, paranoidCheck: false, compression: false, filterPolicy: 0, cacheSize: 0)
     }
     
+    private class func getLibraryPath() -> String {
+        let paths: [String] = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)
+        return paths.first ?? ""
+    }
+    
     public class func databaseInLibrary(withName name: String) -> LevelDB {
-        let opts = makeOptions()
-        return LevelDB.databaseInLibrary(withName: name, andOptions: opts)
+        return LevelDB.databaseInLibrary(withName: name, andOptions: makeOptions())
     }
     
     public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB {
-        let path = LevelDB.getLibraryPath() + "/" + name
-        return LevelDB.open(path: path, db: name)
+        return LevelDB.open(path: LevelDB.getLibraryPath(), db: name)
     }
 
     public var safe: Bool {

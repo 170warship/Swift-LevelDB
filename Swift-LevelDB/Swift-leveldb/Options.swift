@@ -36,7 +36,7 @@ public protocol Options: class {
     var pointer: OpaquePointer { get }
 }
 
-public enum FileOption: Option {
+public enum FileOption: Option,Equatable {
     case createIfMissing
     case errorIfExists
     case paranoidChecks
@@ -93,6 +93,7 @@ public enum FileOption: Option {
             .compression(.snappy)
         ]
     }
+    
 }
 
 final public class FileOptions: Options {

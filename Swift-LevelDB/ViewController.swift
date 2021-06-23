@@ -68,6 +68,7 @@ class ViewController: UIViewController {
     
     func readMeTest() {
         
+        
         let ldb = LevelDB.open(db: "test.db")
         
         // Int
