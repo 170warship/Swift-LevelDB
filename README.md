@@ -19,7 +19,7 @@ By far, the easiest way to integrate this library in your project is by using [C
 #### Open database
 
 ```Swift
- let ldb = LevelDB.open(db: "share.db")
+ let ldb = LevelDB.open(db: "test.db")
 ```
 
 #### Close database

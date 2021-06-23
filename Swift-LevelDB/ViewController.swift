@@ -71,7 +71,6 @@ class ViewController: UIViewController {
         let ldb = LevelDB.open(db: "test.db")
         
         // Int
-        let intValue: Int = 10
         ldb.setCodable(10, forKey: "Int")
         print(ldb.getCodable(forKey: "Int") ?? 0)
         
