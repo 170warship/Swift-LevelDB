@@ -62,7 +62,8 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        readMeTest()
+        //readMeTest()
+        test()
     }
     
     func readMeTest() {
@@ -70,6 +71,7 @@ class ViewController: UIViewController {
         let ldb = LevelDB.open(db: "test.db")
         
         // Int
+        let intValue: Int = 10
         ldb.setCodable(10, forKey: "Int")
         print(ldb.getCodable(forKey: "Int") ?? 0)
         
@@ -116,6 +118,20 @@ class ViewController: UIViewController {
         ldb.setObject(nscodingObject, forKey: "nscodingObject")
         let cacheNsCodingObject = ldb.object(forKey: "struct") as? Student ?? Student()
         print(cacheNsCodingObject.name,cacheNsCodingObject.level,cacheNsCodingObject.height)
+    }
+    
+    func test() {
+        let ldb = LevelDB.open(db: "test.db")
+        
+        let intValue: Int = 10
+        let cacheData = try? JSONEncoder().encode(intValue)
+        ldb.put("Int", value: cacheData)
+        
+        
+        if let getData = ldb.get("Int") {
+           let getIntValue = try? JSONDecoder().decode(Int.self, from: getData)
+           print(getIntValue ?? 0)
+        }
     }
     
     func batchRWOperation() {
