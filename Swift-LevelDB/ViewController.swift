@@ -36,7 +36,6 @@ class Person: NSObject, Codable {
     }
 }
 
-
 class Student: NSObject, NSCoding, NSSecureCoding {
     static var supportsSecureCoding: Bool = true
     var name: String = ""
@@ -63,11 +62,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
         readMeTest()
-       //operationDB()
-       // batchRWOperation()
-
     }
     
     func readMeTest() {
