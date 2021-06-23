@@ -67,8 +67,6 @@ class ViewController: UIViewController {
     }
     
     func readMeTest() {
-        
-        
         let ldb = LevelDB.open(db: "test.db")
         
         // Int
@@ -123,19 +121,14 @@ class ViewController: UIViewController {
     func test() {
         let ldb = LevelDB.open(db: "test.db")
         
-//        let intValue: Int = 10
-//        let cacheData = try? JSONEncoder().encode(intValue)
-//        ldb.put("Int", value: cacheData)
-//
-//
-//        if let getData = ldb.get("Int") {
-//           let getIntValue = try? JSONDecoder().decode(Int.self, from: getData)
-//           print(getIntValue ?? 0)
-//        }
-        
-        ldb.setObject(true, forKey: "233")
-        print(ldb.object(forKey: "2335") ?? false)
-        
+        let intValue: Int = 10
+        let cacheData = try? JSONEncoder().encode(intValue)
+        ldb.put("Int", value: cacheData)
+
+        if let getData = ldb.get("Int") {
+           let getIntValue = try? JSONDecoder().decode(Int.self, from: getData)
+           print(getIntValue ?? 0)
+        }
     }
     
     func batchRWOperation() {
