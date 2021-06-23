@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		022483E12682D44E0087D122 /* Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 022483E02682D44E0087D122 /* Slice.swift */; };
+		022483E62682D4AD0087D122 /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 022483E52682D4AD0087D122 /* Options.swift */; };
 		025F987E266908EB00F287F1 /* libleveldb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 025F9873266908EA00F287F1 /* libleveldb.a */; };
 		025F987F266908EB00F287F1 /* libmemenv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 025F987C266908EB00F287F1 /* libmemenv.a */; };
 		02F3ADE32664E53A00AECB0D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F3ADE22664E53A00AECB0D /* AppDelegate.swift */; };
@@ -39,6 +41,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		022483E02682D44E0087D122 /* Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slice.swift; sourceTree = "<group>"; };
+		022483E52682D4AD0087D122 /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
 		025F986C266908EA00F287F1 /* db.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = db.h; sourceTree = "<group>"; };
 		025F986D266908EA00F287F1 /* cache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cache.h; sourceTree = "<group>"; };
 		025F986E266908EA00F287F1 /* status.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = status.h; sourceTree = "<group>"; };
@@ -182,6 +186,8 @@
 				02F3AE512664E8A300AECB0D /* LevelDB.swift */,
 				02F3AE232664E5EA00AECB0D /* Swift-LevelDB-Bridging-Header.h */,
 				02F3AE662664EAF000AECB0D /* Swift-LevelDBTest.mm */,
+				022483E02682D44E0087D122 /* Slice.swift */,
+				022483E52682D4AD0087D122 /* Options.swift */,
 			);
 			path = "Swift-leveldb";
 			sourceTree = "<group>";
@@ -321,7 +327,9 @@
 				02F3ADE72664E53A00AECB0D /* ViewController.swift in Sources */,
 				02F3ADE32664E53A00AECB0D /* AppDelegate.swift in Sources */,
 				02F3AE522664E8A300AECB0D /* LevelDB.swift in Sources */,
+				022483E12682D44E0087D122 /* Slice.swift in Sources */,
 				02F3ADE52664E53A00AECB0D /* SceneDelegate.swift in Sources */,
+				022483E62682D4AD0087D122 /* Options.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,53 +7,10 @@
 
 import UIKit
 
-public protocol Slice {
-    func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType
-    func data() -> Data
-}
-
-extension Data: Slice {
-    public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
-        return withUnsafeBytes {
-            pointer($0.baseAddress!.assumingMemoryBound(to: Int8.self), self.count)
-        }
-    }
-
-    public func data() -> Data {
-        return self
-    }
-}
-
-extension String: Slice {
-    public func slice<ResultType>(pointer: (UnsafePointer<Int8>, Int) -> ResultType) -> ResultType {
-        return utf8CString.withUnsafeBufferPointer {
-            pointer($0.baseAddress!, Int(strlen($0.baseAddress!)))
-        }
-    }
-
-    public func data() -> Data {
-        return utf8CString.withUnsafeBufferPointer {
-            return Data(buffer: $0)
-        }
-    }
-}
-
-struct LevelDBOptions {
-    var createIfMissing = true
-    var createIntermediateDirectories = true
-    var errorIfExists = false
-    var paranoidCheck = false
-    var compression = false
-    var filterPolicy: Int = 0
-    var cacheSize: size_t = 0
-}
-
 class LevelDB: NSObject {
     fileprivate var db: OpaquePointer?
     fileprivate var writeSync = false
     fileprivate var isUseCache = false
-    fileprivate var readOptions: OpaquePointer?
-    fileprivate var writeOptions: OpaquePointer?
     fileprivate var dbPath: String? = ""
     fileprivate var dbName: String? = ""
 
@@ -80,21 +37,7 @@ class LevelDB: NSObject {
             return
         }
         
-        readOptions = leveldb_readoptions_create()
-        leveldb_readoptions_set_fill_cache(readOptions, 1) // Should the data read for this iteration be cached in memory. Default: true
-        leveldb_readoptions_set_verify_checksums(readOptions, 0) //  If true, all data read from underlying storage will be verified against corresponding checksums. Default: false
-        
-        writeOptions = leveldb_writeoptions_create()
-        leveldb_writeoptions_set_sync(writeOptions, 0) // If true, the write will be flushed from the operating system buffer cache (by calling WritableFile::Sync()) before the write is considered complete.  If this flag is true, writes will be slower.  Default: false
-  
-        let options = leveldb_options_create()
-        leveldb_options_set_create_if_missing(options, 1) // If true, the database will be created if it is missing. Default: false
-        leveldb_options_set_error_if_exists(options, 0) // If true, an error is raised if the database already exists.  Default: false
-        leveldb_options_set_paranoid_checks(options, 0) // If true, the implementation will do aggressive checking of the data it is processing and will stop early if it detects any errors. This may have unforeseen ramifications. Default: false
-        leveldb_options_set_write_buffer_size(options, 4 << 20) // Amount of data to build up in memory before converting to a sorted on-disk file. Default: 4MB
-        leveldb_options_set_max_open_files(options, 1000) // Number of open files that can be used by the DB. Default: 1000
-        leveldb_options_set_compression(options, Int32(leveldb_snappy_compression)) // Compress blocks using the specified compression algorithm. Default: kSnappyCompression
-
+        let options = FileOptions(options: FileOption.standard).pointer
         var error: UnsafeMutablePointer<Int8>?
         let dbPointer = dbPath.utf8CString.withUnsafeBufferPointer {
             leveldb_open(options, $0.baseAddress!, &error)
@@ -118,31 +61,34 @@ class LevelDB: NSObject {
     
     // MARK: Put
 
-    public func put(_ key: Slice, value: Data?) {
+    public func put(_ key: Slice, value: Data?, options: [WriteOption] = WriteOption.standard) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
         var error: UnsafeMutablePointer<Int8>?
+        let writeOptions = ReadOptions(options: ReadOption.standard).pointer
         key.slice { keyBytes, keyCount in
             if let value = value {
                 value.withUnsafeBytes {
-                    leveldb_put(self.db, self.writeOptions, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), value.count, &error)
+                    leveldb_put(self.db, writeOptions, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), value.count, &error)
                 }
             } else {
-                leveldb_put(self.db, self.writeOptions, keyBytes, keyCount, nil, 0, &error)
+                leveldb_put(self.db, writeOptions, keyBytes, keyCount, nil, 0, &error)
             }
         }
     }
     
     // MARK: Get
 
-    public func get(_ key: Slice) -> Data? {
+    public func get(_ key: Slice,options: [ReadOption] = ReadOption.standard) -> Data? {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
+        var valueLength = 0
         var error: UnsafeMutablePointer<Int8>?
         var value: UnsafeMutablePointer<Int8>?
-        var valueLength = 0
+
+        let options = ReadOptions(options: options)
         key.slice { bytes, len in
-            value = leveldb_get(self.db, self.readOptions, bytes, len, &valueLength, &error)
+            value = leveldb_get(self.db, options.pointer, bytes, len, &valueLength, &error)
         }
         // check fetch value lenght
         guard valueLength > 0 else {
@@ -153,6 +99,7 @@ class LevelDB: NSObject {
  
     public func keys() -> [Slice] {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
+        let readOptions = ReadOptions(options: ReadOption.standard).pointer
         
         let iterator = leveldb_create_iterator(db, readOptions)
         leveldb_iter_seek_to_first(iterator)
@@ -167,14 +114,20 @@ class LevelDB: NSObject {
         return keys
     }
     
+    // MARK: Write
+    public func write(options:[WriteOption] = WriteOption.standard) {
+        #warning("TO DO")
+    }
+    
     // MARK: Delete
 
-    public func delete(_ key: Slice) {
+    public func delete(_ key: Slice, options:[WriteOption] = WriteOption.standard ) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
         var error: UnsafeMutablePointer<Int8>?
+        let writeOptions = WriteOptions(options: options).pointer
         key.slice { bytes, len in
-            leveldb_delete(self.db, self.writeOptions, bytes, len, &error)
+            leveldb_delete(self.db, writeOptions, bytes, len, &error)
         }
     }
     
@@ -206,7 +159,7 @@ extension LevelDB {
         }
         set {
             writeSync = newValue
-            leveldb_writeoptions_set_sync(writeOptions, newValue ? 1 : 0)
+            leveldb_writeoptions_set_sync(leveldb_writeoptions_create(), newValue ? 1 : 0)
         }
     }
     
@@ -216,7 +169,7 @@ extension LevelDB {
         }
         set {
             isUseCache = newValue
-            leveldb_readoptions_set_fill_cache(readOptions, newValue ? 1 : 0)
+            leveldb_readoptions_set_fill_cache(leveldb_readoptions_create(), newValue ? 1 : 0)
         }
     }
     
@@ -232,15 +185,15 @@ extension LevelDB {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         assert(key is String || key is Data, "key must be String type or Data type")
         assert(object != nil, "Stored value cannot be empty")
-        
         assert(object is NSCoding, "value must implemented NSCoding protocol!")
         
         var error: UnsafeMutablePointer<Int8>?
         key.slice { keyBytes, keyCount in
             if let value = object {
                 let data: Data = NSKeyedArchiver.archivedData(withRootObject: value)
+                let writeOptions = WriteOptions(options: WriteOption.standard)
                 data.withUnsafeBytes {
-                    leveldb_put(self.db, self.writeOptions, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), data.count, &error)
+                    leveldb_put(self.db, writeOptions.pointer, keyBytes, keyCount, $0.baseAddress!.assumingMemoryBound(to: Int8.self), data.count, &error)
                 }
             }
         }
@@ -258,8 +211,10 @@ extension LevelDB {
         var error: UnsafeMutablePointer<Int8>?
         var value: UnsafeMutablePointer<Int8>?
         var valueLength = 0
+        let readOptions = ReadOptions(options: ReadOption.standard)
+        
         key.slice { bytes, len in
-            value = leveldb_get(self.db, self.readOptions, bytes, len, &valueLength, &error)
+            value = leveldb_get(self.db, readOptions.pointer, bytes, len, &valueLength, &error)
         }
         // check fetch value lenght
         guard valueLength > 0 else {
