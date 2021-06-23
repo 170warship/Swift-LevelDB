@@ -112,12 +112,6 @@ final class LevelDB {
         db = nil
     }
     
-    // MARK: Write
-    
-    public func write(options: [WriteOption] = WriteOption.standard) {
-        #warning("TO DO")
-    }
-    
     deinit {
         close()
     }
