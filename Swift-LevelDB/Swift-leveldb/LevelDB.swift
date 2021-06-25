@@ -14,13 +14,44 @@ final class LevelDB {
     fileprivate var dbPath = ""
     fileprivate var dbName = ""
 
-    // MARK: Open
-
+    /// Create and open a database
+    ///
+    /// It is recommended to use this method to initialize a database
+    ///
+    /// The following example calls this method
+    ///
+    ///      let ldb = LevelDB.open(db: "xxx.db")
+    ///
+    ///
+    /// - Parameters:
+    ///   - path: Sandbox path where the database is stored. Default: ~/Library .
+    ///   - db: database name, It is recommended to use a string ending in .db .
+    /// - Returns: Return an instance of LevelDB.
     public class func open(path: String = getLibraryPath(), db: String) -> LevelDB {
         return LevelDB(path: path, name: db)
     }
-        
-    public convenience init(path: String = getLibraryPath(), name: String, andOptions options: [FileOption] = FileOption.standard) {
+    
+    /// Create and open a database
+    ///
+    /// Convenient initialization method to initialize a database instance
+    ///
+    /// The following example calls this method
+    ///
+    ///      let ldb = LevelDB(name: "xxx.db")
+    ///
+    ///      let ldb = LevelDB(path: "xxxx", name: "xxx.db")
+    ///
+    ///      //let options = [.createIfMissing]
+    ///      let  options = FileOption.standard
+    ///      let ldb = LevelDB(path: "xxxx", name: "xxx.db", options: options)
+    ///
+    ///
+    /// - Parameters:
+    ///   - path: Sandbox path where the database is stored. Default: ~/Library .
+    ///   - name: database name, It is recommended to use a string ending in .db .
+    ///   - options: Database configuration parameters, see FileOption for details, where ".createIfMissing" is necessary, default: FileOption.standard.
+    /// - Returns: Return an instance of LevelDB.
+    public convenience init(path: String = getLibraryPath(), name: String, options: [FileOption] = FileOption.standard) {
         self.init()
         assert(name.count != 0, "The database name cannot be empty")
         assert(options.contains(.createIfMissing), "options must contain .createIfMissing , Otherwise the database creation fails")
@@ -37,9 +68,27 @@ final class LevelDB {
         self.dbPath = dbPath
         self.dbName = name
     }
-
-    // MARK: Put
-
+    
+    /// Cache data to the database
+    ///
+    /// Just convert the data to be cached into Data type, the user can encapsulate and call it
+    ///
+    /// The following example calls this method
+    ///
+    ///      let intValue: Int = 10
+    ///      let cacheData = try? JSONEncoder().encode(intValue)
+    ///      ldb.put("Codable", value: cacheData)
+    ///
+    ///      //class Person: NSObject,NSCoding
+    ///      let p = Person()
+    ///      let data = NSKeyedArchiver.archivedData(withRootObject: object as Any)
+    ///      ldb.put("NSCoding",value: data)
+    ///
+    ///
+    /// - Parameters:
+    ///   - key: The key corresponding to the cached data, supports two types: String and Data
+    ///   - value: The cached data must be of type Data
+    ///   - options: Optional parameter, default WriteOption.standard
     public func put(_ key: Slice, value: Data?, options: [WriteOption] = WriteOption.standard) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
@@ -56,8 +105,27 @@ final class LevelDB {
         }
     }
     
-    // MARK: Get
-
+    
+    /// Get cached data from the database according to the key
+    ///
+    /// Just convert the data to be cached into Data type, the user can encapsulate and call it
+    ///
+    /// The following example calls this method
+    ///
+    ///      if let getData = ldb.get("Codable") {
+    ///        let getIntValue = try? JSONDecoder().decode(Int.self, from: getData)
+    ///        print(getIntValue ?? 0)
+    ///      }
+    ///
+    ///      if let getData = ldb.get("NSCoding") {
+    ///        let getCodingValue = NSKeyedUnarchiver.unarchiveObject(with: data)
+    ///        print(getIntValue ?? Person())
+    ///      }
+    ///
+    ///
+    /// - Parameters:
+    ///   - key: The key corresponding to the cached data, supports two types: String and Data
+    ///   - options: Optional parameter, default WriteOption.standard
     public func get(_ key: Slice, options: [ReadOption] = ReadOption.standard) -> Data? {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
@@ -76,6 +144,8 @@ final class LevelDB {
         return Data(bytes: value!, count: valueLength)
     }
  
+    
+    /// Get the collection of keys corresponding to all data in the database
     public func keys() -> [Slice] {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         let readOptions = ReadOptions(options: ReadOption.standard)
@@ -93,8 +163,18 @@ final class LevelDB {
         return keys
     }
     
-    // MARK: Delete
-
+   
+    /// Delete some data according to the key
+    ///
+    ///
+    /// The following example calls this method
+    ///
+    ///     ldb.delete("Codable")
+    ///
+    ///
+    /// - Parameters:
+    ///   - key: The key corresponding to the cached data, supports two types: String and Data
+    ///   - options: Optional parameter, default WriteOption.standard
     public func delete(_ key: Slice, options: [WriteOption] = WriteOption.standard) {
         assert(db != nil, "Database reference is not existent (it has probably been closed)")
         
@@ -105,8 +185,7 @@ final class LevelDB {
         }
     }
     
-    // MARK: Close
-
+    /// Close the database
     public func close() {
         leveldb_close(db)
         db = nil
