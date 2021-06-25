@@ -22,12 +22,6 @@ By far, the easiest way to integrate this library in your project is by using [C
  let ldb = LevelDB.open(db: "test.db")
 ```
 
-#### Close database
-
-```Swift 
- ldb.close()
-```
-
 #### Cache data
 
 ```Swift
@@ -48,6 +42,12 @@ Remarks: The key type supports String and Data types
 
 ```Swift
  let keys: [Slice] = ldb.keys()
+```
+
+#### Close database
+
+```Swift 
+ ldb.close()
 ```
 
 
