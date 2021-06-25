@@ -24,24 +24,16 @@ By far, the easiest way to integrate this library in your project is by using [C
 
 #### Close database
 
-```Swift
+```Swift 
  ldb.close()
 ```
 
 #### Cache data
 
 ```Swift
-
 let intValue: Int = 10
 let cacheData = try? JSONEncoder().encode(intValue)
 ldb.put("Int", value: cacheData)
-
-
-if let getData = ldb.get("Int") {
-   let getIntValue = try? JSONDecoder().decode(Int.self, from: getData)
-   print(getIntValue ?? 0)
-}
-
 ```
 Remarks: The key type supports String and Data types
 
