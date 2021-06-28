@@ -57,8 +57,6 @@ let getData = ldb.get("Int")
 ```
 
 
-Remarks : The key type supports String and Data types
-
 ## License
 
 Distributed under the [MIT license](LICENSE)
