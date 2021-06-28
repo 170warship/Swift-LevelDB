@@ -31,6 +31,14 @@ ldb.put("Int", value: cacheData)
 ```
 Remarks: The key type supports String and Data types
 
+
+#### Get data
+
+```Swift
+let getData = ldb.get("Int")
+```
+
+
 #### Delete data
 
 ```Swift
@@ -50,6 +58,8 @@ Remarks: The key type supports String and Data types
  ldb.close()
 ```
 
+
+Remarks : The key type supports String and Data types
 
 ## License
 
