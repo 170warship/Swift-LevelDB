@@ -129,11 +129,16 @@ class ViewController: UIViewController {
            let getIntValue = try? JSONDecoder().decode(Int.self, from: getData)
            print(getIntValue ?? 0)
         }
+        
+        // remove objects
+        print(ldb.keys())
+        ldb.removeObjects(forKeys: ["Int"])
+        print(ldb.keys())
     }
     
     func batchRWOperation() {
 
-        let ldb: LevelDB! = LevelDB.databaseInLibrary(withName: "test.db")
+        let ldb: LevelDB! = LevelDB.open(db: "test.db")
         let count = 100000
         //ldb.safe = false
         let writeStartTime = CFAbsoluteTimeGetCurrent()
@@ -150,6 +155,9 @@ class ViewController: UIViewController {
         }
         let readEndTime = CFAbsoluteTimeGetCurrent()
         debugPrint("执行时长：%f 秒", (readEndTime - readStartTime))
+        
+
+        
     }
     
 }

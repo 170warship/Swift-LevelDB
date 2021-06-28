@@ -7,16 +7,6 @@
 
 import Foundation
 
-struct LevelDBOptions {
-    var createIfMissing = true
-    var createIntermediateDirectories = true
-    var errorIfExists = false
-    var paranoidCheck = false
-    var compression = false
-    var filterPolicy: Int = 0
-    var cacheSize: size_t = 0
-}
-
 public enum CompressionType: Int {
     case none = 0
     case snappy
@@ -39,7 +29,7 @@ public protocol Options: class {
 
 
 /// MARK:   Leveldb_option_t
-public enum FileOption: Option, Equatable {
+public enum LevelDBOption: Option, Equatable {
     case createIfMissing
     case errorIfExists
     case paranoidChecks
@@ -78,7 +68,7 @@ public enum FileOption: Option, Equatable {
         }
     }
 
-    public static var standard: [FileOption] {
+    public static var standard: [LevelDBOption] {
         return [
             .createIfMissing,
             .writeBufferSize(4 << 20),
@@ -90,10 +80,10 @@ public enum FileOption: Option, Equatable {
     }
 }
 
-public final class FileOptions: Options {
+public final class LevelDBOptions: Options {
     public let pointer: OpaquePointer
 
-    public init(options: [FileOption]) {
+    public init(options: [LevelDBOption]) {
         self.pointer = leveldb_options_create()
         options.forEach { $0.set(options: pointer) }
     }

@@ -51,13 +51,13 @@ final class LevelDB {
     ///   - name: database name, It is recommended to use a string ending in .db .
     ///   - options: Database configuration parameters, see FileOption for details, where ".createIfMissing" is necessary, default: FileOption.standard.
     /// - Returns: Return an instance of LevelDB.
-    public convenience init(path: String = getLibraryPath(), name: String, options: [FileOption] = FileOption.standard) {
+    public convenience init(path: String = getLibraryPath(), name: String, options: [LevelDBOption] = LevelDBOption.standard) {
         self.init()
         assert(name.count != 0, "The database name cannot be empty")
         assert(options.contains(.createIfMissing), "options must contain .createIfMissing , Otherwise the database creation fails")
         
         let dbPath = path + "/" + name
-        let levelOption = FileOptions(options: options)
+        let levelOption = LevelDBOptions(options: options)
         var error: UnsafeMutablePointer<Int8>?
         
         let dbPointer = dbPath.utf8CString.withUnsafeBufferPointer {
@@ -199,23 +199,12 @@ final class LevelDB {
 // MARK: Compatible with Objective-Leveldb
 
 extension LevelDB {
-    public class func makeOptions() -> LevelDBOptions {
-        return LevelDBOptions(createIfMissing: true, createIntermediateDirectories: true, errorIfExists: false, paranoidCheck: false, compression: false, filterPolicy: 0, cacheSize: 0)
-    }
-    
+
     private class func getLibraryPath() -> String {
         let paths: [String] = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)
         return paths.first ?? ""
     }
     
-    public class func databaseInLibrary(withName name: String) -> LevelDB {
-        return LevelDB.databaseInLibrary(withName: name, andOptions: makeOptions())
-    }
-    
-    public class func databaseInLibrary(withName name: String, andOptions options: LevelDBOptions) -> LevelDB {
-        return LevelDB.open(path: LevelDB.getLibraryPath(), db: name)
-    }
-
     public var safe: Bool {
         get {
             writeSync
@@ -281,9 +270,7 @@ extension LevelDB {
     
     public func removeObjects(forKeys keyArray: [Slice]) {
         for (_, key) in keyArray.enumerated() {
-            if objectExists(forKey: key) {
-                removeObject(forKey: key)
-            }
+            removeObject(forKey: key)
         }
     }
         
@@ -291,9 +278,7 @@ extension LevelDB {
         let keys = allKeys()
         if keys.count > 0 {
             for (_, item) in keys.enumerated() {
-                if objectExists(forKey: item) {
-                    removeObject(forKey: item)
-                }
+                removeObject(forKey: item)
             }
         }
     }
