@@ -29,8 +29,6 @@ let intValue: Int = 10
 let cacheData = try? JSONEncoder().encode(intValue)
 ldb.put("Int", value: cacheData)
 ```
-Remarks: The key type supports String and Data types
-
 
 #### Get data
 
