@@ -137,11 +137,15 @@ final class LevelDB {
         key.slice { bytes, len in
             value = leveldb_get(self.db, options.pointer, bytes, len, &valueLength, &error)
         }
+        
         // check fetch value lenght
         guard valueLength > 0 else {
             return nil
         }
-        return Data(bytes: value!, count: valueLength)
+        let target = Data(bytes: value!, count: valueLength)
+        free(value)
+        return  target
+        
     }
  
     
